@@ -67,7 +67,7 @@ def filter_trades(items):
 
 def get_subscription_info():
     import xml.etree.ElementTree as ET
-    url = "http://apis.data.go.kr/B552555/APTLttotPblancDetail/getLttotPblancSbjct"
+    url = "http://apis.data.go.kr/B552555/APTLttotPblancDetail/getLttotPblancList"
     params = {
         "serviceKey": PUBLIC_DATA_API_KEY,
         "pageNo": 1,
