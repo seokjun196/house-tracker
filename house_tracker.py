@@ -40,6 +40,7 @@ def get_apt_trades(district_code, yyyymm):
         return items
     except Exception as e:
         print(f"[오류] {district_code}: {e}")
+        print(f"[응답 내용]: {res.text[:200]}")
         return []
 
 
