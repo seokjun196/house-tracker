@@ -42,6 +42,28 @@ def get_apt_trades(district_code, yyyymm):
         print(f"[오류] {district_code}: {e}")
         return []
 
+def filter_trades(items):
+    filtered = []
+    for t in items:
+        try:
+            area = float(t.get("excluUseAr", "0").strip())
+            price_str = t.get("dealAmount", "0").replace(",", "").replace(" ", "")
+            price = int(price_str)
+            floor = int(t.get("floor", "0").strip())
+
+            if area < 56:
+                continue
+            if price < 60000 or price > 120000:
+                continue
+            if floor < 5:
+                continue
+
+            filtered.append(t)
+        except:
+            continue
+    return filtered
+
+
 
 def get_subscription_info():
     import xml.etree.ElementTree as ET
@@ -53,6 +75,10 @@ def get_subscription_info():
     }
     try:
         res = requests.get(url, params=params, timeout=10)
+        res.encoding = "utf-8"
+        if not res.text.strip():
+            print("[청약] 응답 없음")
+            return []
         root = ET.fromstring(res.text)
         items = []
         for item in root.findall(".//item"):
@@ -61,6 +87,7 @@ def get_subscription_info():
         return items
     except Exception as e:
         print(f"[청약 오류]: {e}")
+        print(f"[청약 응답]: {res.text[:200]}")
         return []
 
 
@@ -140,6 +167,7 @@ def main():
     all_trades = {}
     for district, code in SEOUL_DISTRICTS.items():
         trades = get_apt_trades(code, yyyymm)
+        trades = filter_trades(trades)
         if trades:
             all_trades[district] = trades
 
