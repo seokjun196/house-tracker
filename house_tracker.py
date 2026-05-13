@@ -21,7 +21,7 @@ SEOUL_DISTRICTS = {
 
 
 def get_apt_trades(district_code, yyyymm):
-    """국토교통부 아파트 매매 실거래가 조회"""
+    import xml.etree.ElementTree as ET
     url = "http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev"
     params = {
         "serviceKey": PUBLIC_DATA_API_KEY,
@@ -29,36 +29,35 @@ def get_apt_trades(district_code, yyyymm):
         "numOfRows": 10,
         "LAWD_CD": district_code,
         "DEAL_YMD": yyyymm,
-        "dataType": "JSON"
     }
     try:
         res = requests.get(url, params=params, timeout=10)
-        data = res.json()
-        items = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items, dict):
-            items = [items]
+        root = ET.fromstring(res.text)
+        items = []
+        for item in root.findall(".//item"):
+            data = {child.tag: child.text for child in item}
+            items.append(data)
         return items
     except Exception as e:
         print(f"[오류] {district_code}: {e}")
-        print(f"[응답 내용]: {res.text[:200]}")
         return []
 
 
 def get_subscription_info():
-    """청약홈 분양정보 조회"""
+    import xml.etree.ElementTree as ET
     url = "http://apis.data.go.kr/B552555/APTLttotPblancDetail/getLttotPblancSbjct"
     params = {
         "serviceKey": PUBLIC_DATA_API_KEY,
         "pageNo": 1,
         "numOfRows": 5,
-        "dataType": "JSON"
     }
     try:
         res = requests.get(url, params=params, timeout=10)
-        data = res.json()
-        items = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items, dict):
-            items = [items]
+        root = ET.fromstring(res.text)
+        items = []
+        for item in root.findall(".//item"):
+            data = {child.tag: child.text for child in item}
+            items.append(data)
         return items
     except Exception as e:
         print(f"[청약 오류]: {e}")
